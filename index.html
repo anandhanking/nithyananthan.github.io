@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Nithyananthan | 3D Systems Architect · Full Stack & Embedded</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-deep: #0a0a1a;
+      --text-primary: #ffffff;
+      --text-secondary: #e2e8f0;
+      --text-muted: #94a3b8;
+      --accent-primary: #3b82f6;
+      --accent-secondary: #8b5cf6;
+      --card-radius: 38px;
+    }
+
+    body {
+      font-family: 'Inter', 'Space Grotesk', sans-serif;
+      background: linear-gradient(135deg, #0a0a1a 0%, #0f0f2a 50%, #0a0a1a 100%);
+      color: var(--text-primary);
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+      position: relative;
+      cursor: none;
+    }
+
+    #meteorCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      display: block;
+      will-change: transform;
+    }
+
+    #threeCanvasHero {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.55;
+      will-change: transform;
+    }
+
+    .content {
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Custom Mouse Cursor */
+    .custom-cursor {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background: radial-gradient(circle, #3b82f6, #8b5cf6);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+      transform: translate(-50%, -50%);
+      transition: width 0.15s ease, height 0.15s ease;
+      will-change: transform, left, top;
+    }
+
+    .custom-cursor.active {
+      width: 24px;
+      height: 24px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.8), rgba(139, 92, 246, 0.5));
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.9);
+    }
+
+    /* Water Ripple Effect */
+    .water-ripple {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 10000;
+      transform: translate(-50%, -50%);
+      animation: rippleAnimation 0.7s ease-out forwards;
+      will-change: width, height, opacity;
+    }
+
+    @keyframes rippleAnimation {
+      0% {
+        width: 0px;
+        height: 0px;
+        border: 2px solid rgba(59, 130, 246, 0.8);
+        opacity: 1;
+      }
+
+      50% {
+        width: 70px;
+        height: 70px;
+        border: 2px solid rgba(139, 92, 246, 0.6);
+        opacity: 0.7;
+      }
+
+      100% {
+        width: 130px;
+        height: 130px;
+        border: 1px solid rgba(59, 130, 246, 0);
+        opacity: 0;
+      }
+    }
+
+    nav {
+      position: fixed;
+      top: 24px;
+      left: 5%;
+      right: 5%;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 36px;
+      background: rgba(10, 10, 26, 0.75);
+      backdrop-filter: blur(20px);
+      border-radius: 100px;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    nav:hover {
+      background: rgba(10, 10, 26, 0.9);
+      border-color: rgba(59, 130, 246, 0.6);
+    }
+
+    .logo {
+      font-family: 'Space Grotesk', monospace;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.8px;
+      background: linear-gradient(135deg, #ffffff, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .logo span {
+      background: none;
+      color: var(--accent-primary);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 48px;
+    }
+
+    .nav-links a {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent-primary);
+    }
+
+    .nav-cta {
+      padding: 8px 28px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .nav-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(59, 130, 246, 0.5);
+    }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 160px 60px 100px;
+      position: relative;
+    }
+
+    .hero-content {
+      flex: 1;
+      max-width: 720px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 20px;
+      background: rgba(59, 130, 246, 0.15);
+      backdrop-filter: blur(4px);
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent-primary);
+      margin-bottom: 28px;
+      border: 1px solid rgba(59, 130, 246, 0.4);
+    }
+
+    .hero h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(48px, 6vw, 84px);
+      line-height: 1.08;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 28px;
+      text-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
+    }
+
+    .hero h1 .accent-grad {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary), #a855f7);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-sub {
+      font-size: 18px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    .hero-typed {
+      font-family: monospace;
+      font-size: 14px;
+      background: rgba(255, 255, 255, 0.05);
+      display: inline-block;
+      padding: 10px 28px;
+      border-radius: 60px;
+      margin-bottom: 44px;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .typed-text {
+      color: var(--accent-primary);
+      font-weight: 600;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 20px;
+    }
+
+    .btn-primary,
+    .btn-ghost {
+      padding: 14px 38px;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(59, 130, 246, 0.5);
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(8px);
+      color: var(--text-secondary);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: var(--accent-primary);
+      color: white;
+    }
+
+    .metrics-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      background: rgba(10, 10, 26, 0.6);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(59, 130, 246, 0.2);
+      border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .metric-card {
+      text-align: center;
+      padding: 52px 24px;
+      transition: all 0.3s ease;
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      cursor: default;
+    }
+
+    .metric-card:last-child {
+      border-right: none;
+    }
+
+    .metric-card:hover {
+      background: rgba(59, 130, 246, 0.1);
+      transform: translateY(-6px);
+    }
+
+    .metric-number {
+      font-family: 'Space Grotesk', monospace;
+      font-size: 58px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1;
+    }
+
+    .metric-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 14px;
+    }
+
+    section {
+      padding: 100px 60px;
+      position: relative;
+      background: transparent;
+    }
+
+    .section-eyebrow {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: var(--accent-primary);
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(38px, 4.5vw, 54px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 22px;
+      color: var(--text-primary);
+    }
+
+    .section-sub {
+      font-size: 17px;
+      color: var(--text-muted);
+      max-width: 620px;
+      margin-bottom: 56px;
+      line-height: 1.6;
+    }
+
+    .grid-3d,
+    .projects-3d,
+    .boards-3d {
+      display: grid;
+      gap: 30px;
+    }
+
+    .grid-3d {
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    }
+
+    .projects-3d {
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    }
+
+    .boards-3d {
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      margin-bottom: 56px;
+    }
+
+    .card-3d,
+    .proj-3d,
+    .board-3d {
+      transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1), box-shadow 0.4s ease;
+      transform-style: preserve-3d;
+      will-change: transform;
+      cursor: pointer;
+    }
+
+    .card-3d {
+      background: rgba(15, 25, 45, 0.6);
+      backdrop-filter: blur(12px);
+      border-radius: var(--card-radius);
+      padding: 36px 32px;
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card-3d::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -60%;
+      width: 180%;
+      height: 180%;
+      background: linear-gradient(115deg, transparent 25%, rgba(59, 130, 246, 0.12) 45%, rgba(139, 92, 246, 0.08) 55%, transparent 75%);
+      transform: rotate(25deg) translateX(-100%);
+      transition: transform 0.6s ease;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .card-3d:hover::before {
+      transform: rotate(25deg) translateX(60%);
+    }
+
+    .card-3d::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.08), transparent 70%);
+      pointer-events: none;
+    }
+
+    .card-3d:hover {
+      transform: translateY(-10px) rotateX(2deg) rotateY(2deg);
+      box-shadow: 0 35px 55px -18px rgba(59, 130, 246, 0.4);
+      border-color: rgba(59, 130, 246, 0.6);
+      background: rgba(20, 35, 65, 0.75);
+    }
+
+    .card-icon {
+      font-size: 52px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary), #c084fc);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 4px;
+      transition: transform 0.3s ease;
+    }
+
+    .card-3d:hover .card-icon {
+      transform: scale(1.05);
+    }
+
+    .card-title {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+      color: var(--text-primary);
+    }
+
+    .card-3d p {
+      font-size: 15px;
+      line-height: 1.55;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    .tag-cluster {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .tag-3d {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 6px 16px;
+      border-radius: 100px;
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--accent-primary);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      backdrop-filter: blur(4px);
+    }
+
+    .proj-3d {
+      background: rgba(15, 25, 45, 0.6);
+      backdrop-filter: blur(12px);
+      border-radius: 38px;
+      overflow: hidden;
+      box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      position: relative;
+    }
+
+    .proj-3d::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+      transition: left 0.5s ease;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .proj-3d:hover::before {
+      left: 100%;
+    }
+
+    .proj-3d:hover {
+      transform: translateY(-10px) rotateX(1.5deg) rotateY(1.5deg);
+      box-shadow: 0 40px 60px -20px rgba(0, 0, 0, 0.4);
+      background: rgba(20, 35, 65, 0.75);
+      border-color: rgba(59, 130, 246, 0.5);
+    }
+
+    .proj-header {
+      padding: 28px 32px 22px;
+      background: linear-gradient(135deg, rgba(15, 25, 45, 0.7), rgba(10, 20, 40, 0.5));
+      border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+      position: relative;
+      z-index: 1;
+    }
+
+    .proj-badge {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: var(--accent-primary);
+      text-transform: uppercase;
+    }
+
+    .proj-name {
+      font-size: 26px;
+      font-weight: 700;
+      margin-top: 12px;
+      font-family: 'Space Grotesk', monospace;
+      letter-spacing: -0.4px;
+      color: var(--text-primary);
+    }
+
+    .proj-status {
+      position: absolute;
+      top: 28px;
+      right: 32px;
+      font-size: 11px;
+      padding: 5px 14px;
+      border-radius: 100px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      backdrop-filter: blur(4px);
+    }
+
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      background: #10b981;
+      border-radius: 50%;
+      animation: pulseAnim 1.8s infinite;
+    }
+
+    @keyframes pulseAnim {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.5;
+        transform: scale(1.3);
+      }
+    }
+
+    .proj-body {
+      padding: 26px 32px 36px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .proj-body p {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+
+    .board-3d {
+      background: rgba(15, 25, 45, 0.55);
+      backdrop-filter: blur(10px);
+      border-radius: 32px;
+      padding: 22px 24px;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .board-3d::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+      transition: left 0.5s ease;
+      pointer-events: none;
+    }
+
+    .board-3d:hover::before {
+      left: 100%;
+    }
+
+    .board-3d:hover {
+      transform: translateY(-6px) rotateX(1deg) rotateY(1deg);
+      background: rgba(20, 35, 65, 0.75);
+      border-color: var(--accent-primary);
+      box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.3);
+    }
+
+    .board-icon-3d {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.15));
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: var(--accent-primary);
+      transition: transform 0.3s;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .board-3d:hover .board-icon-3d {
+      transform: scale(1.05);
+    }
+
+    .board-3d div h4 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text-primary);
+    }
+
+    .board-3d div p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .terminal-3d {
+      background: rgba(10, 15, 28, 0.9);
+      backdrop-filter: blur(8px);
+      border-radius: 32px;
+      overflow: hidden;
+      box-shadow: 0 30px 50px -18px rgba(0, 0, 0, 0.5);
+      transition: transform 0.3s ease;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .terminal-3d:hover {
+      transform: translateY(-5px);
+    }
+
+    .term-header-3d {
+      background: rgba(20, 27, 43, 0.95);
+      padding: 18px 26px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .term-dot-3d {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+    }
+
+    .term-dot-3d:nth-child(1) {
+      background: #ef4444;
+    }
+
+    .term-dot-3d:nth-child(2) {
+      background: #f59e0b;
+    }
+
+    .term-dot-3d:nth-child(3) {
+      background: #10b981;
+    }
+
+    .term-content {
+      padding: 32px;
+      font-family: 'Menlo', 'Fira Code', monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      color: #cbd5e6;
+    }
+
+    .term-prompt {
+      color: #3b82f6;
+    }
+
+    .term-cmd {
+      color: #f1f5f9;
+    }
+
+    .term-success {
+      color: #34d399;
+    }
+
+    .contact-3d {
+      background: linear-gradient(135deg, rgba(10, 15, 28, 0.95), rgba(15, 23, 42, 0.95));
+      backdrop-filter: blur(12px);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      border-top: 1px solid rgba(59, 130, 246, 0.3);
+      border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .contact-3d::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15), transparent);
+    }
+
+    .contact-3d .section-eyebrow {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .contact-3d .section-title {
+      color: white;
+    }
+
+    .contact-3d .section-sub {
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0 auto 40px;
+    }
+
+    .cta-btn-3d {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 50px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+      border-radius: 100px;
+      font-size: 16px;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .cta-btn-3d:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 25px 38px rgba(59, 130, 246, 0.5);
+    }
+
+    footer {
+      padding: 38px 60px;
+      background: rgba(10, 10, 26, 0.7);
+      backdrop-filter: blur(20px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(35px);
+      transition: opacity 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1), transform 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Bottom Contact Button styling - redirect */
+    .bottom-contact-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 1001;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 14px 28px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .bottom-contact-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.6);
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+    }
+
+    @media (max-width:768px) {
+      nav {
+        margin: 16px;
+        padding: 8px 24px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .hero {
+        padding: 130px 24px 70px;
+      }
+
+      section {
+        padding: 70px 24px;
+      }
+
+      .metrics-strip {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .projects-3d {
+        grid-template-columns: 1fr;
+      }
+
+      footer {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+        padding: 28px;
+      }
+
+      .custom-cursor {
+        display: none;
+      }
+
+      body {
+        cursor: auto;
+      }
+
+      .bottom-contact-btn {
+        bottom: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="meteorCanvas"></canvas>
+  <div id="threeCanvasHero"></div>
+  <div class="content">
+    <nav>
+      <div class="logo">NITHYANANTHAN<span>.</span></div>
+      <div class="nav-links"><a href="#stack">STACK</a><a href="#projects">SYSTEMS</a><a href="#embedded">EMBEDDED</a><a
+          href="#mobile">MOBILE</a><a href="#contact">CONNECT</a></div><a href="#contact" class="nav-cta">ENGAGE</a>
+    </nav>
+
+    <section class="hero">
+      <div class="hero-content">
+        <div class="hero-badge reveal"><i class="fas fa-cube"></i> FULL STACK & INDUSTRIAL ARCHITECT</div>
+        <h1 class="reveal">Nithyananthan<br><span class="accent-grad">Engineering the</span><br>Physical & Digital</h1>
+        <p class="hero-sub reveal">Warehouse Control Systems, Industrial Automation, Embedded Firmware — from silicon to
+          server, built with precision.</p>
+        <div class="hero-typed reveal"><span class="typed-text" id="typedOutput"></span><span id="cursorBlink"
+            class="typed-text">|</span></div>
+        <div class="hero-actions reveal"><a href="#projects" class="btn-primary"><i class="fas fa-arrow-right"></i>
+            EXPLORE WORK</a><a href="#contact" class="btn-ghost"><i class="fas fa-comment-dots"></i> LET'S TALK</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="metrics-strip">
+      <div class="metric-card reveal">
+        <div class="metric-number" data-count="14">0+</div>
+        <div class="metric-label">PRODUCTION SYSTEMS</div>
+      </div>
+      <div class="metric-card reveal">
+        <div class="metric-number" data-count="18">0+</div>
+        <div class="metric-label">TECH STACKS</div>
+      </div>
+      <div class="metric-card reveal">
+        <div class="metric-number" data-count="12">0+</div>
+        <div class="metric-label">HARDWARE PLATFORMS</div>
+      </div>
+      <div class="metric-card reveal">
+        <div class="metric-number" data-count="100">0%</div>
+        <div class="metric-label">ZERO DOWNTIME</div>
+      </div>
+    </div>
+
+    <section id="stack">
+      <div class="section-eyebrow reveal">EXPERTISE MATRIX</div>
+      <h2 class="section-title reveal">Every Layer of the Stack</h2>
+      <p class="section-sub reveal">From frontend pixels to firmware bits — rare fusion of web-scale and deep embedded
+        engineering.</p>
+      <div class="grid-3d">
+        <div class="card-3d reveal">
+          <div class="card-icon"><i class="fas fa-code"></i></div>
+          <div class="card-title">Frontend</div>
+          <p>Production Angular & React apps with real-time industrial dashboards.</p>
+          <div class="tag-cluster"><span class="tag-3d">Angular</span><span class="tag-3d">React</span><span
+              class="tag-3d">TypeScript</span></div>
+        </div>
+        <div class="card-3d reveal">
+          <div class="card-icon"><i class="fas fa-server"></i></div>
+          <div class="card-title">Backend</div>
+          <p>Scalable Node.js, Python, Express powering industrial data pipelines & MQTT.</p>
+          <div class="tag-cluster"><span class="tag-3d">Node.js</span><span class="tag-3d">Python</span><span
+              class="tag-3d">Express</span><span class="tag-3d">MQTT</span></div>
+        </div>
+        <div class="card-3d reveal">
+          <div class="card-icon"><i class="fas fa-database"></i></div>
+          <div class="card-title">Databases</div>
+          <p>Multi-database expertise for high-throughput industrial workloads.</p>
+          <div class="tag-cluster"><span class="tag-3d">MySQL</span><span class="tag-3d">MSSQL</span><span
+              class="tag-3d">PostgreSQL</span><span class="tag-3d">Redis</span></div>
+        </div>
+        <div class="card-3d reveal">
+          <div class="card-icon"><i class="fas fa-industry"></i></div>
+          <div class="card-title">Industrial Protocols</div>
+          <p>Direct PLC communication: Modbus RTU/TCP, PyLogix, Beckhoff ADS.</p>
+          <div class="tag-cluster"><span class="tag-3d">Modbus RTU/TCP</span><span class="tag-3d">PyLogix</span><span
+              class="tag-3d">Beckhoff ADS</span></div>
+        </div>
+        <div class="card-3d reveal">
+          <div class="card-icon"><i class="fas fa-microchip"></i></div>
+          <div class="card-title">Embedded Systems</div>
+          <p>Low-level firmware C/C++, MicroPython across ARM, AVR, Linux SBC.</p>
+          <div class="tag-cluster"><span class="tag-3d">C/C++</span><span class="tag-3d">MicroPython</span><span
+              class="tag-3d">RTOS</span><span class="tag-3d">HAL</span></div>
+        </div>
+        <div class="card-3d reveal">
+          <div class="card-icon"><i class="fab fa-flutter"></i></div>
+          <div class="card-title">Mobile Development</div>
+          <p>Cross-platform apps with Flutter & Dart, BLE, real-time hardware sync.</p>
+          <div class="tag-cluster"><span class="tag-3d">Flutter</span><span class="tag-3d">Dart</span><span
+              class="tag-3d">BLoC</span><span class="tag-3d">BLE/WebSocket</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="projects">
+      <div class="section-eyebrow reveal">LIVE DEPLOYMENTS</div>
+      <h2 class="section-title reveal">Systems I've Built</h2>
+      <p class="section-sub reveal">Fully deployed industrial systems running in production environments globally.</p>
+      <div class="projects-3d">
+        <div class="proj-3d reveal">
+          <div class="proj-header">
+            <div class="proj-badge">SYS-001 · WCS</div>
+            <div class="proj-name">Warehouse Control System</div>
+            <div class="proj-status"><span class="pulse-dot"></span>LIVE</div>
+          </div>
+          <div class="proj-body">
+            <p>Dynamic WCS orchestrating conveyors, sortation. Real-time material flow via Modbus TCP and PyLogix to
+              Allen-Bradley PLCs.</p>
+            <div class="tag-cluster"><span class="tag-3d">Angular</span><span class="tag-3d">Node.js</span><span
+                class="tag-3d">PostgreSQL</span><span class="tag-3d">Modbus TCP</span></div>
+          </div>
+        </div>
+        <div class="proj-3d reveal">
+          <div class="proj-header">
+            <div class="proj-badge">SYS-002 · WMS</div>
+            <div class="proj-name">Warehouse Management System</div>
+            <div class="proj-status"><span class="pulse-dot"></span>LIVE</div>
+          </div>
+          <div class="proj-body">
+            <p>Advanced pallet location search & allocation with coordinate-based logic. Complex search engine with
+              FIFO, FILO & embedded safety controls.</p>
+            <div class="tag-cluster"><span class="tag-3d">React</span><span class="tag-3d">Python</span><span
+                class="tag-3d">MSSQL</span><span class="tag-3d">WebSocket</span></div>
+          </div>
+        </div>
+        <div class="proj-3d reveal">
+          <div class="proj-header">
+            <div class="proj-badge">SYS-003 · PMS</div>
+            <div class="proj-name">Production Monitoring System</div>
+            <div class="proj-status"><span class="pulse-dot"></span>LIVE</div>
+          </div>
+          <div class="proj-body">
+            <p>Real-time OEE tracking, machine state monitoring, downtime analysis, live shift reports.</p>
+            <div class="tag-cluster"><span class="tag-3d">Angular</span><span class="tag-3d">Express</span><span
+                class="tag-3d">MySQL</span><span class="tag-3d">Modbus RTU</span></div>
+          </div>
+        </div>
+        <div class="proj-3d reveal">
+          <div class="proj-header">
+            <div class="proj-badge">SYS-004 · ASRS</div>
+            <div class="proj-name">ASRS Control Software</div>
+            <div class="proj-status"><span class="pulse-dot"></span>LIVE</div>
+          </div>
+          <div class="proj-body">
+            <p>Automated Storage & Retrieval System with zone-based search, crane dispatch, dynamic conveyor handoff.
+            </p>
+            <div class="tag-cluster"><span class="tag-3d">Python</span><span class="tag-3d">C++</span><span
+                class="tag-3d">MSSQL</span><span class="tag-3d">Modbus TCP</span></div>
+          </div>
+        </div>
+        <div class="proj-3d reveal">
+          <div class="proj-header">
+            <div class="proj-badge">SYS-005 · AMR</div>
+            <div class="proj-name">AMR Fleet Interface</div>
+            <div class="proj-status"><span class="pulse-dot"></span>LIVE</div>
+          </div>
+          <div class="proj-body">
+            <p>Autonomous Mobile Robot fleet dispatch, path coordination, battery management, collision avoidance.</p>
+            <div class="tag-cluster"><span class="tag-3d">Node.js</span><span class="tag-3d">WebSocket</span><span
+                class="tag-3d">MQTT</span><span class="tag-3d">PostgreSQL</span></div>
+          </div>
+        </div>
+        <div class="proj-3d reveal">
+          <div class="proj-header">
+            <div class="proj-badge">SYS-006 · APS</div>
+            <div class="proj-name">Autonomous Car Parking</div>
+            <div class="proj-status"><span class="pulse-dot"></span>LIVE</div>
+          </div>
+          <div class="proj-body">
+            <p>Automated parking system — slot detection, guided entry/exit, payment integration, real-time bay
+              monitoring.</p>
+            <div class="tag-cluster"><span class="tag-3d">Angular</span><span class="tag-3d">Node.js</span><span
+                class="tag-3d">MySQL</span><span class="tag-3d">Embedded C</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="embedded">
+      <div style="position:relative; z-index:2;">
+        <div class="section-eyebrow reveal">HARDWARE MASTERY</div>
+        <h2 class="section-title reveal">Embedded & Hardware Engineering</h2>
+        <p class="section-sub reveal">From bare-metal C on ARM Cortex-M to MicroPython on ESP32 — Allen‑Bradley,
+          Beckhoff expertise.</p>
+        <div class="boards-3d">
+          <div class="board-3d reveal">
+            <div class="board-icon-3d"><i class="fas fa-microchip"></i></div>
+            <div>
+              <h4>Arduino / AVR</h4>
+              <p>ATmega328P · C/C++ · Low-level I/O</p>
+            </div>
+          </div>
+          <div class="board-3d reveal">
+            <div class="board-icon-3d"><i class="fas fa-brain"></i></div>
+            <div>
+              <h4>STM32</h4>
+              <p>ARM Cortex-M · HAL · RTOS · CAN · SPI</p>
+            </div>
+          </div>
+          <div class="board-3d reveal">
+            <div class="board-icon-3d"><i class="fas fa-microchip"></i></div>
+            <div>
+              <h4>Raspberry Pi</h4>
+              <p>Linux · Python · GPIO · Camera Stack</p>
+            </div>
+          </div>
+          <div class="board-3d reveal">
+            <div class="board-icon-3d"><i class="fas fa-wifi"></i></div>
+            <div>
+              <h4>ESP32 / ESP8266</h4>
+              <p>MicroPython · WiFi · BLE · MQTT · OTA</p>
+            </div>
+          </div>
+          <div class="board-3d reveal">
+            <div class="board-icon-3d"><i class="fas fa-truck"></i></div>
+            <div>
+              <h4>Truck Tracker HW</h4>
+              <p>GPS · GSM · STM32 · Custom PCB · CAN</p>
+            </div>
+          </div>
+          <div class="board-3d reveal">
+            <div class="board-icon-3d"><i class="fas fa-plug"></i></div>
+            <div>
+              <h4>PLC Interface</h4>
+              <p>Allen‑Bradley · Beckhoff · Modbus RTU/TCP</p>
+            </div>
+          </div>
+        </div>
+        <div class="terminal-3d reveal">
+          <div class="term-header-3d">
+            <div class="term-dot-3d"></div>
+            <div class="term-dot-3d"></div>
+            <div class="term-dot-3d"></div><span
+              style="margin-left:auto;font-size:11px;color:#8ba0bc;">embedded@workspace</span>
+          </div>
+          <div class="term-content">
+            <div><span class="term-prompt">$</span> <span class="term-cmd">flash_firmware --target stm32f4 --protocol
+                swd</span></div>
+            <div><span class="term-success">[OK]</span> Erasing flash sectors...</div>
+            <div><span class="term-success">[OK]</span> Writing 128KB firmware image...</div>
+            <div><span class="term-success">[DONE]</span> MCU online · CAN bus active · RTOS running</div>
+            <div style="margin-top:12px;"><span class="term-prompt">$</span> <span class="term-cmd">modbus_read --ip
+                192.168.1.50 --unit 1 --reg 40001</span></div>
+            <div><span class="term-success">Connecting...</span> Coil[40001] = 1 → CONVEYOR_RUNNING</div>
+            <div><span class="term-prompt">$</span> <span class="term-cmd">pylogix --plc 192.168.1.100 --tag
+                "Conveyor_Status"</span></div>
+            <div><span class="term-success">Allen‑Bradley response: RUN_MODE = 1, ZERO_DOWNTIME_ACTIVE</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="mobile">
+      <div class="section-eyebrow reveal">CROSS-PLATFORM</div>
+      <h2 class="section-title reveal">Mobile Development</h2>
+      <p class="section-sub reveal">Flutter & Dart — fast, beautiful apps with embedded hardware integration.</p>
+      <div class="grid-3d" style="margin-bottom:42px;">
+        <div class="card-3d reveal">
+          <div class="card-icon"><i class="fab fa-flutter"></i></div>
+          <div class="card-title">Flutter & Dart</div>
+          <p>Android, iOS, Web from one codebase. BLoC, GPS, BLE integration.</p>
+          <div class="tag-cluster"><span class="tag-3d">Dart</span><span class="tag-3d">BLoC</span><span
+              class="tag-3d">BLE</span></div>
+        </div>
+        <div class="card-3d reveal">
+          <div class="card-icon"><i class="fas fa-mobile-alt"></i></div>
+          <div class="card-title">Hardware Integration</div>
+          <p>Real-time BLE communication with custom embedded trackers.</p>
+          <div class="tag-cluster"><span class="tag-3d">Flutter Blue</span><span class="tag-3d">WebSocket</span><span
+              class="tag-3d">Geofencing</span></div>
+        </div>
+      </div>
+      <div class="proj-3d reveal">
+        <div class="proj-header">
+          <div class="proj-badge">MOB-001 · TRACKING</div>
+          <div class="proj-name">Multi-Platform Fleet Tracking App</div>
+          <div class="proj-status"><span class="pulse-dot"></span>DEPLOYED</div>
+        </div>
+        <div class="proj-body">
+          <p>Real-time fleet tracking across Android & iOS built with Flutter, live GPS maps, geofencing, driver logs,
+            route replay, BLE integration with custom embedded tracker units.</p>
+          <div class="tag-cluster"><span class="tag-3d">Flutter</span><span class="tag-3d">Dart</span><span
+              class="tag-3d">BLE</span><span class="tag-3d">WebSocket</span><span class="tag-3d">Geofencing</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="contact-3d">
+      <div class="section-eyebrow reveal">SOLID. GENUINE. THE REAL DEAL.</div>
+      <h2 class="section-title reveal">Let's Build Something<br><span style="font-style:italic;">Exceptional</span></h2>
+      <p class="section-sub reveal">From warehouse floors to circuit boards — engineered right, the first time.</p><a
+        href="mailto:nithyananthan@engineer.dev" class="cta-btn-3d"
+        style="display: inline-flex; text-decoration: none;"><i class="fas fa-paper-plane"></i> GET IN TOUCH</a>
+    </section>
+
+    <footer>
+      <div class="logo" style="font-size:18px;">NITHYANANTHAN<span>.</span></div>
+      <div style="font-size:12px;color:var(--text-muted);">Full Stack & Embedded Systems Architect</div>
+      <div style="font-size:11px;color:var(--text-muted);"> 2025 All rights reserved</div>
+    </footer>
+  </div>
+
+  <!-- Bottom Floating Contact Button with Redirect -->
+  <button class="bottom-contact-btn" onclick="window.location.href='mailto:nithyananthan@engineer.dev'">
+    <i class="fas fa-envelope"></i> Contact Me
+  </button>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    (function () {
+      // ========== HERO 3D SCENE ==========
+      const heroContainer = document.getElementById('threeCanvasHero');
+      const sceneHero = new THREE.Scene();
+      sceneHero.background = null;
+      sceneHero.fog = new THREE.FogExp2(0x0a0a1a, 0.005);
+      const cameraHero = new THREE.PerspectiveCamera(44, window.innerWidth / window.innerHeight, 0.1, 1000);
+      cameraHero.position.set(0, 1.2, 12);
+      const rendererHero = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+      rendererHero.setSize(window.innerWidth, window.innerHeight);
+      rendererHero.setClearColor(0x0a0a1a, 0);
+      rendererHero.setPixelRatio(1.5);
+      heroContainer.appendChild(rendererHero.domElement);
+
+      const groupHero = new THREE.Group();
+      const icoGeo = new THREE.IcosahedronGeometry(1.8, 0);
+      const coreMat = new THREE.MeshPhysicalMaterial({
+        color: 0x3b82f6,
+        metalness: 0.85,
+        roughness: 0.18,
+        transparent: true,
+        opacity: 0.38,
+        emissive: 0x1e3a8a,
+        emissiveIntensity: 0.22,
+        clearcoat: 1,
+        clearcoatRoughness: 0.15
+      });
+      const coreMesh = new THREE.Mesh(icoGeo, coreMat);
+      groupHero.add(coreMesh);
+      const wireMat = new THREE.MeshBasicMaterial({ color: 0x60a5fa, wireframe: true, transparent: true, opacity: 0.48 });
+      const wireMeshHero = new THREE.Mesh(icoGeo, wireMat);
+      wireMeshHero.scale.set(1.02, 1.02, 1.02);
+      groupHero.add(wireMeshHero);
+
+      // Orbiting balls
+      const orbGroup = [];
+      for (let i = 0; i < 32; i++) {
+        const size = 0.12 + Math.random() * 0.1;
+        const hue = 0.57 + Math.random() * 0.2;
+        const orbMat = new THREE.MeshStandardMaterial({
+          color: new THREE.Color().setHSL(hue, 0.9, 0.65),
+          metalness: 0.85,
+          roughness: 0.18,
+          emissive: new THREE.Color().setHSL(hue, 1, 0.3),
+          emissiveIntensity: 0.12
+        });
+        const orb = new THREE.Mesh(new THREE.DodecahedronGeometry(size), orbMat);
+        const rad = 2.5 + Math.random() * 1.3;
+        const ang = (i / 32) * Math.PI * 2;
+        orb.userData = { radius: rad, angle: ang, speed: 0.005 + Math.random() * 0.007, yOffset: (Math.random() - 0.5) * 2.5, rotSpeed: 0.01 };
+        orb.position.x = Math.cos(ang) * rad;
+        orb.position.z = Math.sin(ang) * rad;
+        orb.position.y = orb.userData.yOffset;
+        groupHero.add(orb);
+        orbGroup.push(orb);
+      }
+      sceneHero.add(groupHero);
+
+      // ========== ENHANCED LIGHTING SYSTEM ==========
+      // Soft ambient base
+      const ambient = new THREE.AmbientLight(0x1a1a2e, 0.6);
+
+      // Main key light — warm white from upper right
+      const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
+      mainLight.position.set(4, 6, 5);
+
+      // Purple fill light — left side
+      const fillLight = new THREE.PointLight(0x8b5cf6, 0.55);
+      fillLight.position.set(-2, 2, 3);
+
+      // Blue back light — behind the object, creates rim separation
+      const backLight = new THREE.PointLight(0x3b82f6, 0.65);
+      backLight.position.set(-2, 1.5, -4);
+
+      // Indigo rim light — right rear, adds edge definition
+      const rimLight = new THREE.PointLight(0x6366f1, 0.5);
+      rimLight.position.set(2.5, 2, -3);
+
+      // Soft top light — lifts the top faces
+      const topLight = new THREE.PointLight(0xffffff, 0.4);
+      topLight.position.set(0, 4.5, 1);
+
+      // Amber moving light — orbits the scene for dynamic highlights
+      const movingLight = new THREE.PointLight(0xf59e0b, 0.35);
+      movingLight.position.set(0, 0, 0);
+
+      sceneHero.add(ambient, mainLight, fillLight, backLight, rimLight, topLight, movingLight);
+
+      let time = 0;
+      function animateHero() {
+        requestAnimationFrame(animateHero);
+        time += 0.012;
+        groupHero.rotation.y = time * 0.15;
+        groupHero.rotation.x = Math.sin(time * 0.1) * 0.08;
+
+        // Amber light orbits independently for dynamic warm glints
+        movingLight.position.x = Math.sin(time * 0.7) * 3.5;
+        movingLight.position.z = Math.cos(time * 0.5) * 3.5;
+        movingLight.position.y = Math.sin(time * 0.8) * 1.5;
+
+        for (let i = 0; i < orbGroup.length; i++) {
+          const orb = orbGroup[i];
+          orb.userData.angle += orb.userData.speed;
+          orb.position.x = Math.cos(orb.userData.angle) * orb.userData.radius;
+          orb.position.z = Math.sin(orb.userData.angle) * orb.userData.radius;
+          orb.position.y = orb.userData.yOffset + Math.sin(time * 0.8 + i) * 0.22;
+          orb.rotation.x += orb.userData.rotSpeed;
+          orb.rotation.y += orb.userData.rotSpeed * 0.9;
+        }
+        rendererHero.render(sceneHero, cameraHero);
+      }
+      animateHero();
+
+      window.addEventListener('resize', () => {
+        cameraHero.aspect = window.innerWidth / window.innerHeight;
+        cameraHero.updateProjectionMatrix();
+        rendererHero.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      // ========== MOUSE CURSOR ==========
+      const cursor = document.createElement('div');
+      cursor.className = 'custom-cursor';
+      document.body.appendChild(cursor);
+
+      let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
+      let cursorX = mouseX, cursorY = mouseY;
+
+      document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      });
+
+      function smoothCursor() {
+        cursorX += (mouseX - cursorX) * 0.28;
+        cursorY += (mouseY - cursorY) * 0.28;
+        cursor.style.left = cursorX + 'px';
+        cursor.style.top = cursorY + 'px';
+        requestAnimationFrame(smoothCursor);
+      }
+      smoothCursor();
+
+      const interactiveElements = document.querySelectorAll('a, button, .card-3d, .proj-3d, .board-3d, .nav-cta, .bottom-contact-btn');
+      interactiveElements.forEach(el => {
+        el.addEventListener('mouseenter', () => cursor.classList.add('active'));
+        el.addEventListener('mouseleave', () => cursor.classList.remove('active'));
+      });
+
+      // ========== WATER RIPPLE ON CLICK ==========
+      function createWaterRipple(x, y) {
+        const ripple = document.createElement('div');
+        ripple.className = 'water-ripple';
+        ripple.style.left = x + 'px';
+        ripple.style.top = y + 'px';
+        document.body.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 700);
+        cursor.style.transform = 'translate(-50%, -50%) scale(1.25)';
+        setTimeout(() => cursor.style.transform = 'translate(-50%, -50%) scale(1)', 150);
+      }
+      document.addEventListener('click', (e) => createWaterRipple(e.clientX, e.clientY));
+
+      // ========== OPTIMIZED METEOR SHOWER ==========
+      const canvas = document.getElementById('meteorCanvas');
+      const ctx = canvas.getContext('2d');
+      let width = window.innerWidth, height = window.innerHeight;
+
+      class Meteor {
+        constructor() {
+          this.reset();
+        }
+        reset() {
+          this.x = Math.random() * width;
+          this.y = Math.random() * -height * 0.3;
+          this.length = 50 + Math.random() * 70;
+          this.speed = 5 + Math.random() * 8;
+          const angleRad = (Math.PI / 180) * (50 + Math.random() * 25);
+          this.vx = Math.cos(angleRad) * this.speed;
+          this.vy = Math.sin(angleRad) * this.speed;
+          this.opacity = 0.5 + Math.random() * 0.4;
+        }
+        update() {
+          const dx = mouseX - this.x, dy = mouseY - this.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 150) {
+            const angle = Math.atan2(dy, dx);
+            const force = (1 - dist / 150) * 0.5;
+            this.x += Math.cos(angle) * force;
+            this.y += Math.sin(angle) * force;
+          }
+          this.x += this.vx;
+          this.y += this.vy;
+          if (this.x < -150 || this.x > width + 150 || this.y > height + 150) this.reset();
+        }
+        draw() {
+          const endX = this.x - this.vx * 0.5;
+          const endY = this.y - this.vy * 0.5;
+          const gradient = ctx.createLinearGradient(this.x, this.y, endX, endY);
+          gradient.addColorStop(0, `rgba(255, 200, 120, ${this.opacity})`);
+          gradient.addColorStop(0.7, `rgba(59, 130, 246, ${this.opacity * 0.4})`);
+          gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+          ctx.beginPath();
+          ctx.moveTo(this.x, this.y);
+          ctx.lineTo(endX, endY);
+          ctx.strokeStyle = gradient;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 220, 140, ${this.opacity})`;
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, 1, 0, Math.PI * 2);
+          ctx.fillStyle = 'white';
+          ctx.fill();
+        }
+      }
+
+      class Star {
+        constructor() {
+          this.x = Math.random() * width;
+          this.y = Math.random() * height;
+          this.radius = Math.random() * 1;
+          this.opacity = 0.3 + Math.random() * 0.5;
+          this.speed = 0.015 + Math.random() * 0.015;
+          this.offset = Math.random() * Math.PI * 2;
+        }
+        draw(t) {
+          const twinkle = this.opacity * (0.6 + 0.4 * Math.sin(t * this.speed + this.offset));
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 255, 255, ${twinkle})`;
+          ctx.fill();
+        }
+      }
+
+      const meteors = [];
+      for (let i = 0; i < 30; i++) meteors.push(new Meteor());
+      const stars = [];
+      for (let i = 0; i < 150; i++) stars.push(new Star());
+
+      let animTime = 0;
+
+      function drawMeteorShower() {
+        if (!ctx) return;
+        animTime += 0.016;
+        const grad = ctx.createLinearGradient(0, 0, 0, height);
+        grad.addColorStop(0, '#050510');
+        grad.addColorStop(1, '#0f0f2a');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+        for (let i = 0; i < stars.length; i++) stars[i].draw(animTime);
+        for (let i = 0; i < meteors.length; i++) { meteors[i].update(); meteors[i].draw(); }
+        requestAnimationFrame(drawMeteorShower);
+      }
+
+      function resizeCanvas() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+        for (let i = 0; i < stars.length; i++) { stars[i].x = Math.random() * width; stars[i].y = Math.random() * height; }
+        for (let i = 0; i < meteors.length; i++) { meteors[i].x = Math.random() * width; meteors[i].y = Math.random() * -height * 0.3; }
+      }
+
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+      drawMeteorShower();
+
+      // ========== TYPEWRITER ==========
+      const phrases = ['Modbus RTU | PyLogix | Beckhoff ADS', 'Allen-Bradley & Beckhoff PLC integration', 'WMS Complex FIFO/FILO Allocation', 'Flutter Fleet Tracking · BLE sync', 'ASRS Crane Orchestration'];
+      let idx = 0, cidx = 0, del = false;
+      const typedSpan = document.getElementById('typedOutput');
+      function typeEffect() {
+        if (!typedSpan) return;
+        let cur = phrases[idx];
+        if (!del) {
+          typedSpan.textContent = cur.slice(0, ++cidx);
+          if (cidx === cur.length) { del = true; setTimeout(typeEffect, 2000); return; }
+        } else {
+          typedSpan.textContent = cur.slice(0, --cidx);
+          if (cidx === 0) { del = false; idx = (idx + 1) % phrases.length; setTimeout(typeEffect, 380); return; }
+        }
+        setTimeout(typeEffect, 50);
+      }
+      setTimeout(typeEffect, 400);
+
+      // ========== COUNTERS ==========
+      const countObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            let target = parseInt(entry.target.dataset.count);
+            let cur = 0;
+            const step = Math.ceil(target / 50);
+            const interval = setInterval(() => {
+              cur = Math.min(cur + step, target);
+              entry.target.textContent = cur + (target === 100 ? '%' : '+');
+              if (cur >= target) clearInterval(interval);
+            }, 22);
+            countObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.5 });
+      document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el));
+
+      // ========== REVEAL ANIMATIONS ==========
+      const revealObs = new IntersectionObserver((entries) => {
+        entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); revealObs.unobserve(entry.target); } });
+      }, { threshold: 0.1 });
+      document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+      const cursorBlink = document.getElementById('cursorBlink');
+      if (cursorBlink) setInterval(() => cursorBlink.style.opacity = cursorBlink.style.opacity === '0' ? '1' : '0', 540);
+    })();
+  </script>
+</body>
+
+</html>
